@@ -1,20 +1,20 @@
-import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { query } = useRouter()
+  const { query } = useRouter();
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       if (query.shop) {
-        const response = await fetch(`/api?shop=${query.shop}`)
-        const redirectUri = await response.text()
-        console.log(redirectUri)
-        window.location.href = redirectUri
+        const response = await fetch(`/api?shop=${query.shop}`);
+        const redirectUri = await response.text();
+        console.log(redirectUri);
+        window.location.href = redirectUri;
       }
-    })()
-  }, [query.shop])
+    })();
+  }, [query.shop]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
@@ -25,16 +25,16 @@ export default function Home() {
 
       <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
         <h1 className="text-6xl font-bold">
-          Welcome to{' '}
+          Welcome to{" "}
           <a className="text-blue-600" href="https://nextjs.org">
             Next.js!
           </a>
         </h1>
 
         <p className="mt-3 text-2xl">
-          Your shop is{' '}
+          Your shop is{" "}
           <code className="rounded-md bg-gray-100 p-3 font-mono text-lg">
-            {query.shop ?? 'no shop'}
+            {query.shop ?? "no shop"}
           </code>
         </p>
       </main>
@@ -46,10 +46,10 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <img src="/vercel.svg" alt="Vercel Logo" className="ml-2 h-4" />
         </a>
       </footer>
     </div>
-  )
+  );
 }
