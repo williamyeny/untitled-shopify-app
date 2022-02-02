@@ -5,17 +5,6 @@ import { useEffect } from "react";
 export default function Home() {
   const { query } = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      if (query.shop) {
-        const response = await fetch(`/api?shop=${query.shop}`);
-        const redirectUri = await response.text();
-        console.log(redirectUri);
-        window.location.href = redirectUri;
-      }
-    })();
-  }, [query.shop]);
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
       <Head>
@@ -37,6 +26,14 @@ export default function Home() {
             {query.shop ?? "no shop"}
           </code>
         </p>
+        <button
+          className="bg-blue-600 p-2 text-white"
+          onClick={() => {
+            window.location.pathname = `/api/auth`;
+          }}
+        >
+          Log in
+        </button>
       </main>
 
       <footer className="flex h-24 w-full items-center justify-center border-t">

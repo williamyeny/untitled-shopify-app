@@ -1,27 +1,60 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
-import { ApiVersion, AuthQuery, Shopify } from "@shopify/shopify-api";
-import { initShopify } from "../../../utils/shopify";
-import { shops } from "..";
+import { AuthQuery } from "@shopify/shopify-api";
+import Shopify, { updateShopifyContext } from "lib/shopify";
 
-initShopify();
+// Handle auth callback from Shopify.
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+  let redirectUrl = `/?host=${req.query.host}`;
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log("attempting auth");
+  // Provide HOST_NAME here just in case it was not provided by env variable
+  // This might occur during the first deploy to Vercel when you don't yet know
+  // what domain your app is being hosted on
+  if (req.headers.host) {
+    updateShopifyContext({ HOST_NAME: req.headers.host });
+  }
+
   try {
-    const session = await Shopify.Auth.validateAuthCallback(
+    await Shopify.Auth.validateAuthCallback(
       req,
       res,
       req.query as unknown as AuthQuery
     );
-    shops.set(session.shop, session);
-    console.log("auth done!");
-    return res.redirect(`https://${session.shop}/admin/apps/untitled-1`);
+    const currentSession = await Shopify.Utils.loadCurrentSession(req, res);
+
+    if (currentSession && currentSession.accessToken) {
+      const { accessToken, shop } = currentSession;
+
+      const response = await Shopify.Webhooks.Registry.register({
+        shop,
+        accessToken,
+        path: "/api/webhooks",
+        topic: "APP_UNINSTALLED",
+      });
+
+      if (!response.APP_UNINSTALLED.success) {
+        console.log(
+          `Failed to register APP_UNINSTALLED webhook: ${response.result}`
+        );
+      } else {
+        console.log("APP_UNINSTALLED Webhook was successfully registered");
+      }
+
+      Shopify.Webhooks.Registry.addHandler("APP_UNINSTALLED", {
+        path: "/api/webhooks",
+        webhookHandler: async () => {
+          console.log("App uninstalled.");
+        },
+      });
+    }
+
+    res.writeHead(302, { Location: redirectUrl });
+    res.end();
   } catch (e) {
-    console.log("auth dead");
-    console.error(e);
-    return res.status(401).send(JSON.stringify(e));
+    res.writeHead(500);
+    if (e instanceof Shopify.Errors.ShopifyError) {
+      res.end(e.message);
+    } else {
+      res.end(`Failed to complete OAuth process: ${JSON.stringify(e)}`);
+    }
   }
 };
-
-export default handler;
