@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Shopify, { updateShopifyContext } from "lib/shopify";
 
-// Handle login and begin Shopify oauth.
+// Handle login and begin Shopify OAuth.
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { shop } = req.query;
   if (!shop || Array.isArray(shop)) {
