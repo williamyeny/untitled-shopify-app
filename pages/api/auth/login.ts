@@ -11,13 +11,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return;
   }
 
-  // Provide HOST_NAME here just in case it was not provided by env variable
-  // This might occur during the first deploy to Vercel when you don't yet know
-  // what domain your app is being hosted on
-  if (req.headers.host) {
-    updateShopifyContext({ HOST_NAME: req.headers.host });
-  }
-
   try {
     const authRoute = await Shopify.Auth.beginAuth(
       req,

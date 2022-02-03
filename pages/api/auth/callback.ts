@@ -6,13 +6,6 @@ import Shopify, { updateShopifyContext } from "lib/shopify";
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   let redirectUrl = `/?host=${req.query.host}`;
 
-  // Provide HOST_NAME here just in case it was not provided by env variable
-  // This might occur during the first deploy to Vercel when you don't yet know
-  // what domain your app is being hosted on
-  if (req.headers.host) {
-    updateShopifyContext({ HOST_NAME: req.headers.host });
-  }
-
   try {
     await Shopify.Auth.validateAuthCallback(
       req,
