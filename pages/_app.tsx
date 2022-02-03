@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     if (host) {
       setHost(host);
     } else {
-      window.location.pathname = `/api/auth/shopify/login`;
+      window.location.pathname = `/api/auth/login`;
     }
   }, []);
 
